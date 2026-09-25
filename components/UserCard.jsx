@@ -7,7 +7,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { useFavorite } from "@/context/FavoriteContext";
+
 export default function UserCard({ user }) {
+  const { isFavorite, toggleFavorite} = useFavorite();
+
   return (
     <Card>
       <CardHeader>
@@ -25,6 +29,15 @@ export default function UserCard({ user }) {
 
         <Button className="mt-4">
           View Profile
+        </Button>
+        
+         {/* ← tambah tombol ini */}
+        <Button
+          onClick={() => toggleFavorite(user)}
+          variant={isFavorite(user.id) ? "default" : "outline"}
+          className="mt-2"
+        >
+          {isFavorite(user.id) ? "♥ Favourite" : "♡ Add Favourite"}
         </Button>
       </CardContent>
     </Card>

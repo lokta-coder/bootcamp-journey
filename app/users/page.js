@@ -1,13 +1,20 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { SearchX } from "lucide-react";
+
 import UserCard from "@/components/UserCard";
-import { Input } from "@/components/ui/input"; // Import Input dari shadcn/ui
+import { Input } from "@/components/ui/input";
+
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  //1. menyimpan input pencarian
   const [search, setSearch] = useState("");
+
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   useEffect(() => {
     fetch("https://jsonplaceholder.typicode.com/users")
@@ -15,6 +22,7 @@ export default function UsersPage() {
         if (!response.ok) {
           throw new Error("Gagal mengambil data");
         }
+
         return response.json();
       })
       .then((data) => {
@@ -27,59 +35,69 @@ export default function UsersPage() {
       });
   }, []);
 
-  //2. filter user sesuai kata pencarian
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(search.toLowerCase())
-  );
+  if (error) {
+    return (
+      <main className="flex min-h-[70vh] items-center justify-center px-6">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-6 text-center">
+          <h2 className="font-semibold text-destructive">
+            Something went wrong
+          </h2>
+
+          <p className="mt-2 text-sm text-destructive/80">{error}</p>
+        </div>
+      </main>
+    );
+  }
 
   if (loading) {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100">
-      <p className="text-gray-600">
-        Loading users...
-      </p>
-    </main>
-  );
-}
-
- if (error) {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-        <h2 className="font-semibold text-red-700">
-          Something went wrong
-        </h2>
-
-        <p className="mt-2 text-sm text-red-600">
-          {error}
+    return (
+      <main className="flex min-h-[70vh] items-center justify-center px-6">
+        <p className="animate-pulse text-muted-foreground">
+          Loading users...
         </p>
-      </div>
-    </main>
-  );
-}
-  return (
-    <main className="min-h-screen bg-pink-50 p-8">
-      <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 text-3xl font-bold">
-          Users
-        </h1>
+      </main>
+    );
+  }
 
-        {/* 3. input Search */}
-        <div className="mb-4">
-          <Input type="text" placeholder="Cari nama user..." value={search} onChange={(e) => setSearch(e.target.value)}/>
+  return (
+    <section className="relative">
+      <div className="bg-grid bg-radial-fade absolute inset-0 -z-10" />
+
+      <div className="mx-auto max-w-6xl px-6 py-20">
+        <div className="max-w-2xl">
+          <p className="text-sm font-semibold text-primary">Directory</p>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight md:text-5xl">
+            User Directory
+          </h1>
+          <p className="mt-4 text-muted-foreground">
+            Browse and search through registered users.
+          </p>
         </div>
 
-        {/* 4. menampilkan nama user sesuai filter */}
-       {filteredUsers.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredUsers.map((user) => (
-              <UserCard key={user.id} user={user} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500 text-center py-4">User tidak ditemukan.</p>
-        )}
+        <Input
+          type="text"
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="mt-10 h-10 max-w-sm rounded-full px-4"
+        />
+
+        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((user) => (
+              <UserCard
+                key={user.id}
+                user={user}
+              />
+            ))
+          ) : (
+            <div className="col-span-full flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
+              <SearchX className="size-8" />
+              <p>User tidak ditemukan.</p>
+            </div>
+          )}
+        </div>
       </div>
-    </main>
+    </section>
   );
 }
